@@ -87,7 +87,7 @@ Criar um site estático para mostrar trabalhos de crochet, com design inspirado 
 
 ## Etapas gerais de implementação
 
-1. Criar estrutura de pastas e projeto Vite
+1. Criar estrutura de pastas e projeto estático
 2. Definir layout e navegação em `index.html`
 3. Implementar estilo base e variáveis no CSS
 4. Desenvolver galeria e modal de portfólio
@@ -98,7 +98,7 @@ Criar um site estático para mostrar trabalhos de crochet, com design inspirado 
 
 ## Próximos passos
 
-- Confirmar o uso de Vite como gerador
+- Confirmar o uso de um site estático simples
 - Criar a estrutura de pastas inicial
 - Popular o site com imagens e textos de exemplo
 - Validar localmente antes de avançar para deploy

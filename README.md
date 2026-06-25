@@ -1,18 +1,11 @@
 # Fabul Crochet
 
-Site estático de apresentação de trabalhos de crochet, criado com Vite.
+Site estático de apresentação de trabalhos de crochet.
 
 ## Como usar
 
-1. Instalar dependências:
-   ```bash
-   npm install
-   ```
-2. Iniciar o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-3. Abrir o site em `http://localhost:4173`.
+1. Abrir `index.html` diretamente no navegador ou usar seu servidor estático preferido.
+2. Se desejar, hospedar em Cloudflare Pages ou outro serviço de hosting estático.
 
 ## Estrutura
 
