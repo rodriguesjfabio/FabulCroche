@@ -1,0 +1,42 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.95rem 1.85rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--action);
+  color: #0b0f1c;
+  box-shadow: 0 18px 50px rgba(73, 174, 239, 0.2);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(59, 38, 67, 0.14);
+  color: var(--text);
+}
+
+.hero-copy p,
+.card-copy p,
+.feature-card p,
+.contact-copy p,
+.comment-item p {
+  color: rgba(59, 38, 67, 0.86);
+}
+
+label {
+  color: var(--text-light);
+}
+
+input,
+textarea {
+  color: var(--text-light);
+}

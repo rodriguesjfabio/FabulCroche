@@ -1,0 +1,11 @@
+Elemento	HEX	RGB
+Roxo escuro (fundo/sombras)	#33205A	(51, 32, 90)
+Roxo principal	#5233A3	(82, 51, 163)
+Roxo claro	#6D43B8	(109, 67, 184)
+Rosa principal	#F98EA9	(249, 142, 169)
+Rosa claro (brilhos)	#F7B8BD	(247, 184, 189)
+Rosa escuro (sombras)	#A3566C	(163, 86, 108)
+Azul do novelo/botões	#49AEEF	(73, 174, 239)
+Azul escuro (linhas do novelo)	#2D78C8	(45, 120, 200)
+Bege da agulha/faixa	#BC9699 	(188, 150, 153)
+Branco dos brilhos	#FDFCFC	(253, 252, 252)

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fabul Crochê</title>
+    <meta
+      name="description"
+      content="Fabul Crochê - trabalhos artesanais em crochê, portfólio, contato e área de comentários."
+    />
+    <link rel="stylesheet" href="./src/styles/main.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="#home" class="brand">
+          <img src="images/Logo1-transparent.png" alt="Logo Fabul Crochê" class="brand-logo" />
+          <span>Fabul Crochê</span>
+        </a>
+        <button class="menu-toggle" aria-label="Abrir menu">☰</button>
+        <nav class="site-nav">
+          <a href="#home">Início</a>
+          <a href="#portfolio">Portfólio</a>
+          <a href="#about">Sobre</a>
+          <a href="#contact">Contato</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero-section">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">Artesanato em crochê</span>
+            <h1>Presentes feitos com carinho e delicadeza</h1>
+            <p>
+              Descubra peças únicas, com texturas suaves, cores encantadoras e acabamento artesanal.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#portfolio">Ver trabalhos</a>
+              <a class="btn btn-secondary" href="#contact">Fale comigo</a>
+            </div>
+          </div>
+          <div class="hero-image-card">
+            <div class="hero-image-glow"></div>
+            <img src="images/Logo4alternativa2.png" alt="Trabalho de crochê" />
+          </div>
+        </div>
+      </section>
+
+      <section id="portfolio" class="section section-portfolio">
+        <div class="container">
+          <div class="section-header">
+            <!--<span>Portfólio</span>-->
+            <h2>Alguns trabalhos recentes</h2>
+          </div>
+          <div class="portfolio-grid" id="portfolioGrid"></div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </section>
+
+      <section id="about" class="section section-about">
+        <div class="container about-grid">
+          <div class="about-copy">
+            <span>Sobre</span>
+            <h2>História, estilo e carinho em cada ponto</h2>
+            <p>
+              O Fabul Crochê nasce da paixão por criar peças que contam histórias. Cada trabalho é feito à mão com atenção aos detalhes,
+              cores que combinam e conforto que abraça.
+            </p>
+            <p>
+              Aqui você encontra um portfólio com peças personalizadas, ideias para presentes especiais e um jeito acolhedor de encomendar o seu crochê.
+            </p>
+          </div>
+          <div class="about-details">
+            <div class="feature-card">
+              <h3>Peças personalizadas</h3>
+              <p>Modelos feitos sob medida para aniversários, batizados e presentes especiais.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Acabamento suave</h3>
+              <p>Escolha de fios delicados e combinações de cores com acabamento artesanal.</p>
+            </div>
+            <div class="feature-card">
+              <h3>Atendimento próximo</h3>
+              <p>Atendimento personalizado para transformar ideias em peças únicas.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="section section-contact">
+        <div class="container contact-grid">
+          <div class="contact-copy">
+            <span>Contato</span>
+            <h2>Vamos criar algo especial?</h2>
+            <p>
+              Envie sua ideia, solicite um orçamento ou peça sugestões de presentes artesanais. Estou pronta para ajudar.
+            </p>
+            <div class="contact-info">
+              <div>
+                <strong>Email</strong>
+                <p>contato@fabulcrochê.com</p>
+              </div>
+              <div>
+                <strong>WhatsApp</strong>
+                <p>+55 11 9XXXX-XXXX</p>
+              </div>
+            </div>
+          </div>
+          <form id="contactForm" class="contact-form">
+            <label>
+              Nome
+              <input type="text" name="name" required placeholder="Seu nome" />
+            </label>
+            <label>
+              Email
+              <input type="email" name="email" required placeholder="seu@email.com" />
+            </label>
+            <label>
+              Mensagem
+              <textarea name="message" rows="5" required placeholder="Escreva sua ideia..."></textarea>
+            </label>
+            <button type="submit" class="btn btn-primary">Enviar mensagem</button>
+            <p class="form-feedback" id="formFeedback"></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>Fabul Crochê © 2026. Feito com amor e pontos especiais.</p>
+        <div class="social-links">
+          <a href="#">Instagram</a>
+          <a href="#">WhatsApp</a>
+          <a href="#">Email</a>
+        </div>
+      </div>
+    </footer>
+
+    <div class="modal-overlay hidden" id="modalOverlay" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" id="modalClose" aria-label="Fechar">×</button>
+        <div class="modal-content">
+          <div class="modal-image">
+            <img src="" alt="" id="modalImage" />
+          </div>
+          <div class="modal-details">
+            <h3 id="modalTitle"></h3>
+            <p id="modalDescription"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/scripts/main.js"></script>
+  </body>
+</html>
