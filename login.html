@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FabulCrochet — Login</title>
+  <link rel="stylesheet" href="src/styles/login.css" />
+  <meta name="robots" content="noindex,nofollow" />
+</head>
+<body>
+  <main class="login-container">
+    <h1>Login — Acesso Privado</h1>
+    <form id="loginForm" novalidate>
+      <label class="field">
+        <span>Usuário</span>
+        <input type="text" name="username" required autocomplete="username" />
+      </label>
+
+      <label class="field">
+        <span>Senha</span>
+        <input type="password" name="password" required autocomplete="current-password" />
+      </label>
+
+      <button type="submit" class="btn">Entrar</button>
+      <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+    </form>
+  </main>
+
+  <!-- Result modal -->
+  <div id="resultModal" class="result-modal hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle" aria-hidden="true">
+    <div class="result-modal-inner">
+      <h2 id="resultTitle">Status</h2>
+      <p id="resultMessage"></p>
+      <div class="result-actions">
+        <button id="resultClose" class="btn btn-secondary">Fechar</button>
+        <button id="resultContinue" class="btn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.FABUL_WEBHOOK = "https://n8n.fabulcroche.com/webhook/XYhCcGKfXzSDwrnegdeyKCwHUaaAxoXG";
+    window.FABUL_VALIDATE_ENDPOINT = "http://localhost:5678/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
+  </script>
+  <script src="src/scripts/login.js"></script>
+</body>
+</html>

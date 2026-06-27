@@ -14,7 +14,7 @@ const messageInput = contactForm.querySelector("textarea[name='message']");
 const formFeedback = document.querySelector("#formFeedback");
 const paginationElement = document.querySelector("#pagination");
 
-const contactEndpoint = "https://n8n.fabulcroche.com/webhook/contact-form";
+const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
 const contactToken = "r6BVpJjNx3GN8N1R3Xgz3t7L3HzaTuRA";
 const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.com", "yahoo.com", "icloud.com", "mail.com", "protonmail.com", "aol.com"];
 

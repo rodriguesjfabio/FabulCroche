@@ -1,0 +1,40 @@
+/* Simple styles for private login page */
+:root{
+  --bg:#fafafa;
+  --card:#ffffff;
+  --accent:#c04d7a;
+  --text:#222;
+}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.login-container{
+  width:min(460px,94%);
+  background:var(--card);
+  padding:28px;
+  border-radius:10px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.08);
+}
+.login-container h1{margin:0 0 16px;font-size:20px}
+.field{display:block;margin-bottom:12px}
+.field span{display:block;font-size:13px;margin-bottom:6px}
+.field input{width:100%;padding:10px 12px;border:1px solid #e6e6e6;border-radius:6px;font-size:15px}
+.btn{background:var(--accent);color:#fff;padding:10px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:600}
+.feedback{margin-top:12px;font-size:14px;color:#444}
+
+/* Modal styles */
+.result-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:1200}
+.result-modal.hidden{display:none}
+.result-modal-inner{background:var(--card);padding:20px;border-radius:10px;max-width:420px;width:94%;box-shadow:0 10px 40px rgba(0,0,0,0.25);text-align:left}
+.result-modal-inner h2{margin:0 0 8px;font-size:18px}
+.result-modal-inner p{margin:0 0 16px;color:var(--text)}
+.result-actions{display:flex;gap:8px;justify-content:flex-end}
+.btn-secondary{background:#eee;color:#222;padding:8px 12px;border-radius:8px;border:none}
+.btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none}
