@@ -32,8 +32,8 @@ function hideResultModal() {
 
 resultClose?.addEventListener("click", () => hideResultModal());
 resultContinue?.addEventListener("click", () => {
-  const HOME = window.FABUL_HOME || (location.protocol && location.protocol.startsWith("http") ? "/" : "index.html");
-  window.location.replace(HOME);
+  const HOME = window.FABUL_HOME || "/";
+  window.location.assign(HOME);
 });
 
 async function validateSession(token) {
@@ -143,7 +143,8 @@ loginForm.addEventListener("submit", async (e) => {
       if (token && VALIDATE_ENDPOINT) startSessionValidationPoll(token);
 
       feedback.textContent = "";
-      showResultModal(true, "Login realizado com sucesso");
+      const HOME = window.FABUL_HOME || "/";
+      window.location.replace(HOME);
     } else {
       feedback.textContent = "";
       showResultModal(false, "Não foi possível realizar o login");
