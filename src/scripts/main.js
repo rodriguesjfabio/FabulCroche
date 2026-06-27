@@ -9,12 +9,14 @@ const modalDescription = document.querySelector("#modalDescription");
 const menuToggle = document.querySelector(".menu-toggle");
 const siteNav = document.querySelector(".site-nav");
 const contactForm = document.querySelector("#contactForm");
+const emailInput = contactForm.querySelector("input[name='email']");
 const messageInput = contactForm.querySelector("textarea[name='message']");
 const formFeedback = document.querySelector("#formFeedback");
 const paginationElement = document.querySelector("#pagination");
 
 const contactEndpoint = "http://n8n.fabulcroche.com/webhook/contact-form";
 const contactToken = "r6BVpJjNx3GN8N1R3Xgz3t7L3HzaTuRA";
+const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.com", "yahoo.com", "icloud.com", "mail.com", "protonmail.com", "aol.com"];
 
 const ITEMS_PER_PAGE = 6;
 let currentPage = 1;
@@ -139,6 +141,16 @@ function initModalListeners() {
   });
 }
 
+function isValidEmail(email) {
+  const normalizedEmail = email.toLowerCase();
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailPattern.test(normalizedEmail)) return false;
+
+  const [, domain] = normalizedEmail.split("@");
+  return allowedEmailDomains.includes(domain) || allowedEmailDomains.some((allowedDomain) => domain.endsWith(`.${allowedDomain}`));
+}
+
 contactForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(contactForm);
@@ -148,6 +160,12 @@ contactForm.addEventListener("submit", async (event) => {
 
   if (!name || !email || !message) {
     formFeedback.textContent = "Preencha todos os campos para enviar.";
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    formFeedback.textContent = "Informe um e-mail válido com domínio como Gmail, Outlook, Hotmail, Yahoo ou similar.";
+    emailInput?.focus();
     return;
   }
 
@@ -164,7 +182,7 @@ contactForm.addEventListener("submit", async (event) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        token: contactToken,
+        Authorization: contactToken,
       },
       body: JSON.stringify(payload),
     });
