@@ -13,6 +13,9 @@ const messageInput = contactForm.querySelector("textarea[name='message']");
 const formFeedback = document.querySelector("#formFeedback");
 const paginationElement = document.querySelector("#pagination");
 
+const contactEndpoint = "http://n8n.fabulcroche.com/webhook/contact-form";
+const contactToken = "r6BVpJjNx3GN8N1R3Xgz3t7L3HzaTuRA";
+
 const ITEMS_PER_PAGE = 6;
 let currentPage = 1;
 
@@ -136,7 +139,7 @@ function initModalListeners() {
   });
 }
 
-contactForm.addEventListener("submit", (event) => {
+contactForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(contactForm);
   const name = formData.get("name").trim();
@@ -148,8 +151,34 @@ contactForm.addEventListener("submit", (event) => {
     return;
   }
 
-  formFeedback.textContent = "Mensagem preparada. Em localhost, envie por email ou configure backend.";
-  contactForm.reset();
+  formFeedback.textContent = "Enviando mensagem...";
+
+  try {
+    const payload = {
+      name,
+      email,
+      message,
+    };
+
+    const response = await fetch(contactEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        token: contactToken,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha no envio");
+    }
+
+    formFeedback.textContent = "Mensagem enviada com sucesso! Obrigado.";
+    contactForm.reset();
+  } catch (error) {
+    console.error(error);
+    formFeedback.textContent = "Erro ao enviar. Verifique o endpoint ou tente novamente.";
+  }
 });
 
 function init() {
