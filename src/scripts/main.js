@@ -21,6 +21,7 @@ const markdownEditor = document.querySelector("#markdownEditor");
 const saveMarkdownBtn = document.querySelector("#saveMarkdownBtn");
 const clearMarkdownBtn = document.querySelector("#clearMarkdownBtn");
 const adminFeedback = document.querySelector("#adminFeedback");
+const modalGallery = document.querySelector("#modalGallery");
 
 const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
@@ -47,7 +48,7 @@ function renderPortfolioPage(page) {
     card.className = "portfolio-card";
     card.innerHTML = `
       <div class="card-image">
-        <img src="${item.image}" alt="${item.title}" />
+        <img src="${(item.images && item.images.length > 0) ? item.images[0] : ''}" alt="${item.title}" />
       </div>
       <div class="card-copy">
         <h3>${item.title}</h3>
@@ -111,10 +112,30 @@ function renderPagination() {
 
 async function openModal(item) {
   currentItemInModal = item;
-  modalImage.src = item.image;
+  const mainImg = (item.images && item.images.length > 0) ? item.images[0] : "";
+  modalImage.src = mainImg;
   modalImage.alt = item.title;
   modalTitle.textContent = item.title;
   modalDescription.textContent = item.description;
+
+  // Render multiple images if available
+  if (modalGallery) {
+    modalGallery.innerHTML = "";
+    if (item.images && item.images.length > 1) {
+      item.images.forEach((imgUrl, index) => {
+        const thumb = document.createElement("img");
+        thumb.src = imgUrl;
+        thumb.alt = `${item.title} - Foto ${index + 1}`;
+        thumb.className = index === 0 ? "thumb-img active" : "thumb-img";
+        thumb.addEventListener("click", () => {
+          modalImage.src = imgUrl;
+          modalGallery.querySelectorAll(".thumb-img").forEach(t => t.classList.remove("active"));
+          thumb.classList.add("active");
+        });
+        modalGallery.appendChild(thumb);
+      });
+    }
+  }
 
   // Clear modal markdown view and editor
   if (modalMarkdownContent) modalMarkdownContent.innerHTML = "";

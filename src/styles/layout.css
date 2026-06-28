@@ -754,4 +754,30 @@
   font-size: 0.9em;
 }
 
+.modal-gallery {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.thumb-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.thumb-img:hover {
+  transform: scale(1.05);
+}
+
+.thumb-img.active {
+  border-color: var(--accent);
+}
+
 
