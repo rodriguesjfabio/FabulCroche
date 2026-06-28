@@ -14,14 +14,27 @@ const messageInput = contactForm.querySelector("textarea[name='message']");
 const formFeedback = document.querySelector("#formFeedback");
 const paginationElement = document.querySelector("#pagination");
 
+// Markdown Modal Elements
+const modalMarkdownContent = document.querySelector("#modalMarkdownContent");
+const modalAdminPanel = document.querySelector("#modalAdminPanel");
+const markdownEditor = document.querySelector("#markdownEditor");
+const saveMarkdownBtn = document.querySelector("#saveMarkdownBtn");
+const clearMarkdownBtn = document.querySelector("#clearMarkdownBtn");
+const adminFeedback = document.querySelector("#adminFeedback");
+
 const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
 const contactToken = "r6BVpJjNx3GN8N1R3Xgz3t7L3HzaTuRA";
 const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.com", "yahoo.com", "icloud.com", "mail.com", "protonmail.com", "aol.com"];
 
+// Markdown Webhooks
+const GET_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/CGHSEVHHlnQOMSRDCTzIQjVeMYPijsiu";
+const POST_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/nUTEPpUaIXoqyPBrVmUBazUJZHzOuhgo";
+
 const ITEMS_PER_PAGE = 6;
 let currentPage = 1;
 let authCheckInFlight = false;
+let currentItemInModal = null;
 
 function renderPortfolioPage(page) {
   portfolioGrid.innerHTML = "";
@@ -96,16 +109,76 @@ function renderPagination() {
   }
 }
 
-function openModal(item) {
+async function openModal(item) {
+  currentItemInModal = item;
   modalImage.src = item.image;
   modalImage.alt = item.title;
   modalTitle.textContent = item.title;
   modalDescription.textContent = item.description;
+
+  // Clear modal markdown view and editor
+  if (modalMarkdownContent) modalMarkdownContent.innerHTML = "";
+  if (markdownEditor) markdownEditor.value = "";
+  if (adminFeedback) {
+    adminFeedback.textContent = "";
+    adminFeedback.className = "admin-feedback";
+  }
+
+  // Check login token
+  const token = sessionStorage.getItem("fabul_auth_token");
+  const isLoggedIn = !!token;
+
+  if (modalAdminPanel) {
+    modalAdminPanel.classList.toggle("hidden", !isLoggedIn);
+  }
+
   modalOverlay.classList.remove("hidden");
+
+  // Load existing Markdown content
+  try {
+    if (modalMarkdownContent) {
+      modalMarkdownContent.innerHTML = "<p class='admin-feedback loading'>Carregando descrição detalhada...</p>";
+    }
+    
+    const response = await fetch(`${GET_MARKDOWN_ENDPOINT}?id=${item.id}`, {
+      method: "GET"
+    });
+
+    if (!response.ok) {
+      throw new Error(`Status HTTP ${response.status}`);
+    }
+
+    const rawData = await response.json().catch(() => null);
+    const data = Array.isArray(rawData) ? rawData[0] : rawData;
+    const content = (data && data.content) ? data.content.trim() : "";
+
+    if (modalMarkdownContent) {
+      if (content) {
+        // Use marked library to parse markdown to HTML safely
+        if (typeof marked !== "undefined") {
+          modalMarkdownContent.innerHTML = marked.parse(content);
+        } else {
+          modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${content}</p>`;
+        }
+
+        if (markdownEditor && isLoggedIn) {
+          markdownEditor.value = content;
+        }
+      } else {
+        modalMarkdownContent.innerHTML = "";
+      }
+    }
+  } catch (error) {
+    console.error("Failed to load markdown content", error);
+    if (modalMarkdownContent) {
+      modalMarkdownContent.innerHTML = "<p class='admin-feedback error'>Não foi possível carregar a descrição detalhada.</p>";
+    }
+  }
 }
 
 function closeModal() {
   modalOverlay.classList.add("hidden");
+  currentItemInModal = null;
 }
 
 function updateAuthStatusText(isConnected) {
@@ -298,6 +371,122 @@ function initLogoutListener() {
   });
 }
 
+function initMarkdownEditorListeners() {
+  if (saveMarkdownBtn) {
+    saveMarkdownBtn.addEventListener("click", async () => {
+      if (!currentItemInModal) return;
+      const token = sessionStorage.getItem("fabul_auth_token");
+      if (!token) {
+        alert("Sessão expirada. Por favor, realize o login novamente.");
+        return;
+      }
+
+      const content = markdownEditor.value.trim();
+      saveMarkdownBtn.disabled = true;
+      saveMarkdownBtn.textContent = "Salvando...";
+      if (adminFeedback) {
+        adminFeedback.textContent = "Enviando dados...";
+        adminFeedback.className = "admin-feedback loading";
+      }
+
+      try {
+        const response = await fetch(POST_MARKDOWN_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ id: currentItemInModal.id, content })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        // Render updated markdown content
+        if (modalMarkdownContent) {
+          if (content) {
+            if (typeof marked !== "undefined") {
+              modalMarkdownContent.innerHTML = marked.parse(content);
+            } else {
+              modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${content}</p>`;
+            }
+          } else {
+            modalMarkdownContent.innerHTML = "";
+          }
+        }
+
+        if (adminFeedback) {
+          adminFeedback.textContent = "Salvo com sucesso!";
+          adminFeedback.className = "admin-feedback success";
+        }
+      } catch (err) {
+        console.error("Failed to save markdown content", err);
+        if (adminFeedback) {
+          adminFeedback.textContent = "Erro ao salvar o conteúdo.";
+          adminFeedback.className = "admin-feedback error";
+        }
+      } finally {
+        saveMarkdownBtn.disabled = false;
+        saveMarkdownBtn.textContent = "Salvar";
+      }
+    });
+  }
+
+  if (clearMarkdownBtn) {
+    clearMarkdownBtn.addEventListener("click", async () => {
+      if (!currentItemInModal) return;
+      const token = sessionStorage.getItem("fabul_auth_token");
+      if (!token) {
+        alert("Sessão expirada. Por favor, realize o login novamente.");
+        return;
+      }
+
+      const confirmClear = confirm("Tem certeza absoluta que deseja APAGAR todo o conteúdo de descrição detalhada deste item? Essa ação não pode ser desfeita.");
+      if (!confirmClear) return;
+
+      clearMarkdownBtn.disabled = true;
+      clearMarkdownBtn.textContent = "Apagando...";
+      if (adminFeedback) {
+        adminFeedback.textContent = "Apagando dados...";
+        adminFeedback.className = "admin-feedback loading";
+      }
+
+      try {
+        const response = await fetch(POST_MARKDOWN_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ id: currentItemInModal.id, content: "" })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        if (markdownEditor) markdownEditor.value = "";
+        if (modalMarkdownContent) modalMarkdownContent.innerHTML = "";
+
+        if (adminFeedback) {
+          adminFeedback.textContent = "Conteúdo apagado com sucesso!";
+          adminFeedback.className = "admin-feedback success";
+        }
+      } catch (err) {
+        console.error("Failed to clear markdown content", err);
+        if (adminFeedback) {
+          adminFeedback.textContent = "Erro ao apagar o conteúdo.";
+          adminFeedback.className = "admin-feedback error";
+        }
+      } finally {
+        clearMarkdownBtn.disabled = false;
+        clearMarkdownBtn.textContent = "Apagar Tudo";
+      }
+    });
+  }
+}
+
 function init() {
   renderPortfolioPage(currentPage);
   renderPagination();
@@ -307,6 +496,7 @@ function init() {
   autosizeMessage();
   messageInput.addEventListener("input", autosizeMessage);
   initLogoutListener();
+  initMarkdownEditorListeners();
 
   window.addEventListener("hashchange", () => checkAuthStatus());
   window.addEventListener("pageshow", () => checkAuthStatus());

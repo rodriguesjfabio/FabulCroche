@@ -9,6 +9,7 @@
       content="Fabul Crochê - trabalhos artesanais em crochê, portfólio, contato e área de comentários."
     />
     <link rel="stylesheet" href="./src/styles/main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -153,6 +154,17 @@
           <div class="modal-details">
             <h3 id="modalTitle"></h3>
             <p id="modalDescription"></p>
+            <div id="modalMarkdownContent" class="markdown-body"></div>
+            <div id="modalAdminPanel" class="modal-admin-panel hidden">
+              <hr class="admin-divider" />
+              <h4>Descrição Detalhada (Admin)</h4>
+              <textarea id="markdownEditor" rows="8" placeholder="Escreva a descrição detalhada em Markdown..."></textarea>
+              <div class="admin-actions">
+                <button id="saveMarkdownBtn" class="btn btn-primary btn-sm">Salvar</button>
+                <button id="clearMarkdownBtn" class="btn btn-danger btn-sm">Apagar Tudo</button>
+              </div>
+              <p id="adminFeedback" class="admin-feedback"></p>
+            </div>
           </div>
         </div>
       </div>

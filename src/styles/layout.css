@@ -632,3 +632,121 @@
   display: none !important;
 }
 
+.modal-admin-panel {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-divider {
+  border: 0;
+  border-top: 1px dashed rgba(163, 87, 108, 0.3);
+  margin: 1.5rem 0 1rem 0;
+}
+
+.modal-admin-panel h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--accent-dark);
+}
+
+#markdownEditor {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(163, 87, 108, 0.25);
+  background: #fff5f7;
+  color: var(--text);
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 120px;
+}
+
+#markdownEditor:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(249, 142, 169, 0.15);
+}
+
+.admin-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.btn-sm {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+}
+
+.btn-danger {
+  background: #ff5f6d;
+  color: #fff;
+  border: none;
+  box-shadow: 0 8px 20px rgba(255, 95, 109, 0.18);
+}
+
+.btn-danger:hover {
+  background: #e04f5b;
+}
+
+.admin-feedback {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-feedback.success {
+  color: #355f39;
+}
+
+.admin-feedback.error {
+  color: #7a1b1b;
+}
+
+.admin-feedback.loading {
+  color: var(--text-muted);
+}
+
+/* Rendered markdown stylings */
+.markdown-body {
+  margin-top: 1.2rem;
+  color: rgba(59, 38, 67, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  color: var(--text);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-body p {
+  margin-bottom: 0.85rem;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.markdown-body li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-body code {
+  font-family: monospace;
+  background: rgba(163, 87, 108, 0.1);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+
