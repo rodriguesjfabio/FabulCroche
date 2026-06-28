@@ -4,9 +4,11 @@ const submitBtn = loginForm.querySelector("button[type=submit]");
 const WEBHOOK = window.FABUL_WEBHOOK;
 const AUTH_ENDPOINT = window.FABUL_AUTH_ENDPOINT || null;
 const VALIDATE_ENDPOINT = window.FABUL_VALIDATE_ENDPOINT || null;
+const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 let _sessionValidationInterval = null;
 
 const loginMessage = document.getElementById("loginMessage");
+const authStatus = document.getElementById("authStatus");
 
 function showInlineMessage(success, message) {
   if (!loginMessage) return;
@@ -18,6 +20,39 @@ function clearInlineMessage() {
   if (!loginMessage) return;
   loginMessage.textContent = "";
   loginMessage.className = "login-message";
+}
+
+function updateAuthStatusText(isConnected) {
+  if (!authStatus) return;
+  authStatus.textContent = isConnected ? "Conectado" : "Desconectado";
+  authStatus.classList.toggle("connected", isConnected);
+  authStatus.classList.toggle("disconnected", !isConnected);
+}
+
+async function checkAuthStatus() {
+  const token = sessionStorage.getItem("fabul_auth_token");
+  if (!token) {
+    updateAuthStatusText(false);
+    return;
+  }
+
+  try {
+    const response = await fetch(AUTH_CHECK_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ token, sentAt: new Date().toISOString() }),
+    });
+
+    const data = await response.json().catch(() => null);
+    const isConnected = !!(response.ok && data && data.authenticated === true);
+    updateAuthStatusText(isConnected);
+  } catch (error) {
+    console.error("Auth status check failed", error);
+    updateAuthStatusText(false);
+  }
 }
 
 async function validateSession(token) {
@@ -134,7 +169,6 @@ loginForm.addEventListener("submit", async (e) => {
 
       feedback.textContent = "";
       showInlineMessage(true, "Login realizado com sucesso");
-      window.location.href = "/";
     } else {
       feedback.textContent = "";
       showInlineMessage(false, "Não foi possível realizar o login");

@@ -60,6 +60,41 @@ body {
   font-weight: 700;
 }
 
+.auth-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.auth-status::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: #ff5f6d;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+
+.auth-status.connected::before {
+  background: #8ddf8b;
+}
+
+.auth-status.connected {
+  color: #fff;
+}
+
+.auth-status.disconnected {
+  color: rgba(255, 255, 255, 0.82);
+}
+
 .login-nav {
   display: flex;
   gap: 18px;

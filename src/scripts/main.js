@@ -14,6 +14,7 @@ const messageInput = contactForm.querySelector("textarea[name='message']");
 const formFeedback = document.querySelector("#formFeedback");
 const paginationElement = document.querySelector("#pagination");
 
+const AUTH_CHECK_ENDPOINT = "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
 const contactToken = "r6BVpJjNx3GN8N1R3Xgz3t7L3HzaTuRA";
 const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.com", "yahoo.com", "icloud.com", "mail.com", "protonmail.com", "aol.com"];
@@ -104,6 +105,40 @@ function openModal(item) {
 
 function closeModal() {
   modalOverlay.classList.add("hidden");
+}
+
+function updateAuthStatusText(isConnected) {
+  const authStatus = document.getElementById("authStatus");
+  if (!authStatus) return;
+  authStatus.textContent = isConnected ? "Conectado" : "Desconectado";
+  authStatus.classList.toggle("connected", isConnected);
+  authStatus.classList.toggle("disconnected", !isConnected);
+}
+
+async function checkAuthStatus() {
+  const token = sessionStorage.getItem("fabul_auth_token");
+  if (!token) {
+    updateAuthStatusText(false);
+    return;
+  }
+
+  try {
+    const response = await fetch(AUTH_CHECK_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ token, sentAt: new Date().toISOString() }),
+    });
+
+    const data = await response.json().catch(() => null);
+    const isConnected = !!(response.ok && data && data.authenticated === true);
+    updateAuthStatusText(isConnected);
+  } catch (error) {
+    console.error("Auth status check failed", error);
+    updateAuthStatusText(false);
+  }
 }
 
 function initNavigation() {
@@ -207,6 +242,7 @@ function init() {
   initModalListeners();
   autosizeMessage();
   messageInput.addEventListener("input", autosizeMessage);
+  checkAuthStatus();
 }
 
 init();
