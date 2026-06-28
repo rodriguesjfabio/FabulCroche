@@ -61,7 +61,7 @@ body {
 }
 
 .auth-status {
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 0.5rem;
   padding: 0.32rem 0.85rem;
@@ -72,6 +72,10 @@ body {
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.auth-status.visible {
+  display: inline-flex;
 }
 
 .auth-status::before {

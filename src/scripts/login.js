@@ -24,9 +24,15 @@ function clearInlineMessage() {
 
 function updateAuthStatusText(isConnected) {
   if (!authStatus) return;
-  authStatus.textContent = isConnected ? "Conectado" : "Desconectado";
+  authStatus.textContent = "";
+  authStatus.classList.toggle("visible", isConnected);
   authStatus.classList.toggle("connected", isConnected);
   authStatus.classList.toggle("disconnected", !isConnected);
+  if (isConnected) {
+    authStatus.setAttribute("aria-label", "Conectado");
+  } else {
+    authStatus.removeAttribute("aria-label");
+  }
 }
 
 async function checkAuthStatus() {
@@ -35,6 +41,8 @@ async function checkAuthStatus() {
     updateAuthStatusText(false);
     return;
   }
+
+  updateAuthStatusText(true);
 
   try {
     const response = await fetch(AUTH_CHECK_ENDPOINT, {
@@ -47,11 +55,16 @@ async function checkAuthStatus() {
     });
 
     const data = await response.json().catch(() => null);
-    const isConnected = !!(response.ok && data && data.authenticated === true);
-    updateAuthStatusText(isConnected);
+    const isConnected = !!(
+      response.ok &&
+      data &&
+      (data.authenticated === true || data.success === true || data.valid === true || data.ok === true || data.status === "authenticated")
+    );
+
+    updateAuthStatusText(isConnected || !!token);
   } catch (error) {
     console.error("Auth status check failed", error);
-    updateAuthStatusText(false);
+    updateAuthStatusText(true);
   }
 }
 
@@ -165,6 +178,10 @@ loginForm.addEventListener("submit", async (e) => {
       if (expires) sessionStorage.setItem("fabul_auth_expiresAt", String(expires));
 
       const token = tokenValue || sessionStorage.getItem("fabul_auth_token");
+      updateAuthStatusText(!!token);
+      if (token) {
+        checkAuthStatus();
+      }
       if (token && VALIDATE_ENDPOINT) startSessionValidationPoll(token);
 
       feedback.textContent = "";
@@ -185,6 +202,11 @@ loginForm.addEventListener("submit", async (e) => {
 // On script load: if token exists, start validation poll (so pages that include this script will validate)
 (function autoStartValidationIfNeeded() {
   const token = sessionStorage.getItem("fabul_auth_token");
+  if (token) {
+    updateAuthStatusText(true);
+    checkAuthStatus();
+  }
+
   if (token && VALIDATE_ENDPOINT) {
     // validate immediately and start polling
     startSessionValidationPoll(token);

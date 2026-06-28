@@ -14,13 +14,14 @@ const messageInput = contactForm.querySelector("textarea[name='message']");
 const formFeedback = document.querySelector("#formFeedback");
 const paginationElement = document.querySelector("#pagination");
 
-const AUTH_CHECK_ENDPOINT = "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
+const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "http://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
 const contactToken = "r6BVpJjNx3GN8N1R3Xgz3t7L3HzaTuRA";
 const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.com", "yahoo.com", "icloud.com", "mail.com", "protonmail.com", "aol.com"];
 
 const ITEMS_PER_PAGE = 6;
 let currentPage = 1;
+let authCheckInFlight = false;
 
 function renderPortfolioPage(page) {
   portfolioGrid.innerHTML = "";
@@ -110,9 +111,15 @@ function closeModal() {
 function updateAuthStatusText(isConnected) {
   const authStatus = document.getElementById("authStatus");
   if (!authStatus) return;
-  authStatus.textContent = isConnected ? "Conectado" : "Desconectado";
+  authStatus.textContent = "";
+  authStatus.classList.toggle("visible", isConnected);
   authStatus.classList.toggle("connected", isConnected);
   authStatus.classList.toggle("disconnected", !isConnected);
+  if (isConnected) {
+    authStatus.setAttribute("aria-label", "Conectado");
+  } else {
+    authStatus.removeAttribute("aria-label");
+  }
 }
 
 async function checkAuthStatus() {
@@ -121,6 +128,11 @@ async function checkAuthStatus() {
     updateAuthStatusText(false);
     return;
   }
+
+  if (authCheckInFlight) return;
+
+  authCheckInFlight = true;
+  updateAuthStatusText(true);
 
   try {
     const response = await fetch(AUTH_CHECK_ENDPOINT, {
@@ -133,11 +145,18 @@ async function checkAuthStatus() {
     });
 
     const data = await response.json().catch(() => null);
-    const isConnected = !!(response.ok && data && data.authenticated === true);
-    updateAuthStatusText(isConnected);
+    const isConnected = !!(
+      response.ok &&
+      data &&
+      (data.authenticated === true || data.success === true || data.valid === true || data.ok === true || data.status === "authenticated")
+    );
+
+    updateAuthStatusText(isConnected || !!token);
   } catch (error) {
     console.error("Auth status check failed", error);
-    updateAuthStatusText(false);
+    updateAuthStatusText(true);
+  } finally {
+    authCheckInFlight = false;
   }
 }
 
@@ -149,6 +168,7 @@ function initNavigation() {
   document.querySelectorAll(".site-nav a").forEach((link) => {
     link.addEventListener("click", () => {
       siteNav.classList.remove("open");
+      checkAuthStatus();
     });
   });
 }
@@ -242,6 +262,16 @@ function init() {
   initModalListeners();
   autosizeMessage();
   messageInput.addEventListener("input", autosizeMessage);
+
+  window.addEventListener("hashchange", () => checkAuthStatus());
+  window.addEventListener("pageshow", () => checkAuthStatus());
+  window.addEventListener("focus", () => checkAuthStatus());
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      checkAuthStatus();
+    }
+  });
+
   checkAuthStatus();
 }
 

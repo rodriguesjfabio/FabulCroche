@@ -13,7 +13,7 @@
       <a href="/" class="brand">
         <span>Fabul Crochê</span>
       </a>
-      <span class="auth-status" id="authStatus">Desconectado</span>
+      <span class="auth-status" id="authStatus" aria-live="polite"></span>
     </div>
   </header>
 
@@ -45,6 +45,7 @@
   <script>
     window.FABUL_WEBHOOK = "https://n8n.fabulcroche.com/webhook/XYhCcGKfXzSDwrnegdeyKCwHUaaAxoXG";
     window.FABUL_VALIDATE_ENDPOINT = "http://localhost:5678/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
+    window.FABUL_AUTH_CHECK_ENDPOINT = "http://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
   </script>
   <script src="/src/scripts/login.js"></script>
 </body>
