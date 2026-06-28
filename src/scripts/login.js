@@ -23,15 +23,20 @@ function clearInlineMessage() {
 }
 
 function updateAuthStatusText(isConnected) {
-  if (!authStatus) return;
-  authStatus.textContent = "";
-  authStatus.classList.toggle("visible", isConnected);
-  authStatus.classList.toggle("connected", isConnected);
-  authStatus.classList.toggle("disconnected", !isConnected);
-  if (isConnected) {
-    authStatus.setAttribute("aria-label", "Conectado");
-  } else {
-    authStatus.removeAttribute("aria-label");
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (authStatus) {
+    authStatus.textContent = "";
+    authStatus.classList.toggle("visible", isConnected);
+    authStatus.classList.toggle("connected", isConnected);
+    authStatus.classList.toggle("disconnected", !isConnected);
+    if (isConnected) {
+      authStatus.setAttribute("aria-label", "Conectado");
+    } else {
+      authStatus.removeAttribute("aria-label");
+    }
+  }
+  if (logoutBtn) {
+    logoutBtn.classList.toggle("hidden", !isConnected);
   }
 }
 
@@ -54,14 +59,20 @@ async function checkAuthStatus() {
       body: JSON.stringify({ token, sentAt: new Date().toISOString() }),
     });
 
-    const data = await response.json().catch(() => null);
+    const rawData = await response.json().catch(() => null);
+    const data = Array.isArray(rawData) ? rawData[0] : rawData;
     const isConnected = !!(
       response.ok &&
       data &&
       (data.authenticated === true || data.success === true || data.valid === true || data.ok === true || data.status === "authenticated")
     );
 
-    updateAuthStatusText(isConnected || !!token);
+    if (!isConnected) {
+      sessionStorage.removeItem("fabul_auth_token");
+      sessionStorage.removeItem("fabul_auth_expiresAt");
+      sessionStorage.removeItem("fabul_auth_user");
+    }
+    updateAuthStatusText(isConnected);
   } catch (error) {
     console.error("Auth status check failed", error);
     updateAuthStatusText(true);
@@ -81,8 +92,17 @@ async function validateSession(token) {
     });
 
     if (!res.ok) return false;
-    const data = await res.json().catch(() => null);
-    return !!(data && data.success && data.authenticated);
+    const rawData = await res.json().catch(() => null);
+    if (!rawData) return false;
+    const data = Array.isArray(rawData) ? rawData[0] : rawData;
+    return !!(
+      data &&
+      (data.authenticated === true ||
+       data.success === true ||
+       data.valid === true ||
+       data.ok === true ||
+       data.status === "authenticated")
+    );
   } catch (err) {
     console.error("validateSession error", err);
     return false;
@@ -199,9 +219,51 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
+function initLogoutListener() {
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (!logoutBtn) return;
+  logoutBtn.addEventListener("click", async () => {
+    const token = sessionStorage.getItem("fabul_auth_token");
+    logoutBtn.disabled = true;
+    logoutBtn.textContent = "Saindo...";
+
+    try {
+      if (token) {
+        await fetch("https://n8n.fabulcroche.com/webhook/KSCCaiuejVoPmrNdQOJPUtLNybqNLFto", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ token, action: "logout", sentAt: new Date().toISOString() })
+        });
+      }
+    } catch (err) {
+      console.error("Logout request failed", err);
+    } finally {
+      sessionStorage.removeItem("fabul_auth_token");
+      sessionStorage.removeItem("fabul_auth_expiresAt");
+      sessionStorage.removeItem("fabul_auth_user");
+      
+      logoutBtn.disabled = false;
+      logoutBtn.textContent = "Sair";
+      updateAuthStatusText(false);
+
+      const feedback = document.getElementById("feedback");
+      const loginMessage = document.getElementById("loginMessage");
+      if (feedback) feedback.textContent = "";
+      if (loginMessage) {
+        loginMessage.textContent = "";
+        loginMessage.className = "login-message";
+      }
+    }
+  });
+}
+
 // On script load: if token exists, start validation poll (so pages that include this script will validate)
 (function autoStartValidationIfNeeded() {
   const token = sessionStorage.getItem("fabul_auth_token");
+  initLogoutListener();
   if (token) {
     updateAuthStatusText(true);
     checkAuthStatus();

@@ -18,7 +18,8 @@ Criar um site estático para mostrar trabalhos de crochet, com design inspirado 
   - `src/styles/main.css`
   - `src/scripts/main.js`
   - `src/data/portfolio.js`
-  - `public/images/` para logos e fotos do portfólio
+  - `images/logos/` para logotipos
+  - `images/portfolio/` para fotos das peças do portfólio
 - Opção futura: `wrangler.toml` e Cloudflare Workers/KV para comentários persistentes
 
 ## Paleta de cores

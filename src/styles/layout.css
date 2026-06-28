@@ -600,3 +600,29 @@
   line-height: 1.85;
 }
 
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 95, 109, 0.15);
+  border-color: rgba(255, 95, 109, 0.4);
+  color: #ff5f6d;
+}
+
+.logout-btn.hidden {
+  display: none !important;
+}
+

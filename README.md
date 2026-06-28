@@ -13,7 +13,8 @@ Site estático de apresentação de trabalhos de crochet.
 - `src/styles/main.css` — estilos e paleta de cores
 - `src/scripts/main.js` — lógica de galeria e comentários
 - `src/data/portfolio.js` — dados do portfólio
-- `public/images/` — imagens e logos existentes
+- `images/logos/` — logotipos da marca
+- `images/portfolio/` — imagens das peças do portfólio
 
 ## Observações
 

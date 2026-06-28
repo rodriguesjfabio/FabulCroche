@@ -14,7 +14,7 @@ const messageInput = contactForm.querySelector("textarea[name='message']");
 const formFeedback = document.querySelector("#formFeedback");
 const paginationElement = document.querySelector("#pagination");
 
-const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "http://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
+const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
 const contactToken = "r6BVpJjNx3GN8N1R3Xgz3t7L3HzaTuRA";
 const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.com", "yahoo.com", "icloud.com", "mail.com", "protonmail.com", "aol.com"];
@@ -110,15 +110,20 @@ function closeModal() {
 
 function updateAuthStatusText(isConnected) {
   const authStatus = document.getElementById("authStatus");
-  if (!authStatus) return;
-  authStatus.textContent = "";
-  authStatus.classList.toggle("visible", isConnected);
-  authStatus.classList.toggle("connected", isConnected);
-  authStatus.classList.toggle("disconnected", !isConnected);
-  if (isConnected) {
-    authStatus.setAttribute("aria-label", "Conectado");
-  } else {
-    authStatus.removeAttribute("aria-label");
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (authStatus) {
+    authStatus.textContent = "";
+    authStatus.classList.toggle("visible", isConnected);
+    authStatus.classList.toggle("connected", isConnected);
+    authStatus.classList.toggle("disconnected", !isConnected);
+    if (isConnected) {
+      authStatus.setAttribute("aria-label", "Conectado");
+    } else {
+      authStatus.removeAttribute("aria-label");
+    }
+  }
+  if (logoutBtn) {
+    logoutBtn.classList.toggle("hidden", !isConnected);
   }
 }
 
@@ -144,14 +149,20 @@ async function checkAuthStatus() {
       body: JSON.stringify({ token, sentAt: new Date().toISOString() }),
     });
 
-    const data = await response.json().catch(() => null);
+    const rawData = await response.json().catch(() => null);
+    const data = Array.isArray(rawData) ? rawData[0] : rawData;
     const isConnected = !!(
       response.ok &&
       data &&
       (data.authenticated === true || data.success === true || data.valid === true || data.ok === true || data.status === "authenticated")
     );
 
-    updateAuthStatusText(isConnected || !!token);
+    if (!isConnected) {
+      sessionStorage.removeItem("fabul_auth_token");
+      sessionStorage.removeItem("fabul_auth_expiresAt");
+      sessionStorage.removeItem("fabul_auth_user");
+    }
+    updateAuthStatusText(isConnected);
   } catch (error) {
     console.error("Auth status check failed", error);
     updateAuthStatusText(true);
@@ -254,6 +265,39 @@ contactForm.addEventListener("submit", async (event) => {
   }
 });
 
+function initLogoutListener() {
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (!logoutBtn) return;
+  logoutBtn.addEventListener("click", async () => {
+    const token = sessionStorage.getItem("fabul_auth_token");
+    logoutBtn.disabled = true;
+    logoutBtn.textContent = "Saindo...";
+
+    try {
+      if (token) {
+        await fetch("https://n8n.fabulcroche.com/webhook/KSCCaiuejVoPmrNdQOJPUtLNybqNLFto", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ token, action: "logout", sentAt: new Date().toISOString() })
+        });
+      }
+    } catch (err) {
+      console.error("Logout request failed", err);
+    } finally {
+      sessionStorage.removeItem("fabul_auth_token");
+      sessionStorage.removeItem("fabul_auth_expiresAt");
+      sessionStorage.removeItem("fabul_auth_user");
+      
+      logoutBtn.disabled = false;
+      logoutBtn.textContent = "Sair";
+      updateAuthStatusText(false);
+    }
+  });
+}
+
 function init() {
   renderPortfolioPage(currentPage);
   renderPagination();
@@ -262,6 +306,7 @@ function init() {
   initModalListeners();
   autosizeMessage();
   messageInput.addEventListener("input", autosizeMessage);
+  initLogoutListener();
 
   window.addEventListener("hashchange", () => checkAuthStatus());
   window.addEventListener("pageshow", () => checkAuthStatus());
