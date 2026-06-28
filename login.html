@@ -4,17 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FabulCrochet — Login</title>
-  <link rel="stylesheet" href="/src/styles/login.css" />
+  <link rel="stylesheet" href="./src/styles/main.css" />
+  <link rel="stylesheet" href="./src/styles/login.css" />
   <meta name="robots" content="noindex,nofollow" />
 </head>
 <body>
-  <header class="site-header login-header">
+  <header class="site-header">
     <div class="container header-inner">
       <a href="/" class="brand">
+        <img src="images/logos/Logo1-transparent.png" alt="Logo Fabul Crochê" class="brand-logo" />
         <span>Fabul Crochê</span>
       </a>
-      <span class="auth-status" id="authStatus" aria-live="polite"></span>
-      <button id="logoutBtn" class="logout-btn hidden" title="Desconectar">Sair</button>
+      <div class="auth-group">
+        <span class="auth-status" id="authStatus" aria-live="polite"></span>
+        <button id="logoutBtn" class="logout-btn hidden" title="Desconectar">Sair</button>
+      </div>
     </div>
   </header>
 
@@ -48,6 +52,6 @@
     window.FABUL_VALIDATE_ENDPOINT = "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
     window.FABUL_AUTH_CHECK_ENDPOINT = "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
   </script>
-  <script src="/src/scripts/login.js"></script>
+  <script src="./src/scripts/login.js"></script>
 </body>
 </html>

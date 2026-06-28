@@ -30,90 +30,7 @@ body {
   background: linear-gradient(180deg, #fff 0%, var(--surface-light) 100%);
 }
 
-.site-header.login-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  backdrop-filter: blur(22px);
-  background: linear-gradient(180deg, rgba(69, 39, 87, 0.96), rgba(59, 32, 76, 0.98));
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 6px 22px rgba(59, 32, 76, 0.12);
-}
 
-.container {
-  width: min(1100px, 92%);
-  margin: 0 auto;
-}
-
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.54rem 0;
-}
-
-.brand {
-  text-decoration: none;
-  color: var(--text-light);
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.auth-status {
-  display: none;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.32rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 0.88rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.auth-status.visible {
-  display: inline-flex;
-}
-
-.auth-status::before {
-  content: "";
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 999px;
-  background: #ff5f6d;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
-}
-
-.auth-status.connected::before {
-  background: #8ddf8b;
-}
-
-.auth-status.connected {
-  color: #fff;
-}
-
-.auth-status.disconnected {
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.login-nav {
-  display: flex;
-  gap: 18px;
-}
-
-.login-nav a {
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 180ms ease;
-}
-
-.login-nav a:hover {
-  color: var(--accent-light);
-}
 
 .login-page {
   min-height: calc(100vh - 92px);
@@ -264,28 +181,4 @@ body {
   }
 }
 
-.logout-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.9);
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-left: 0.5rem;
-}
 
-.logout-btn:hover {
-  background: rgba(255, 95, 109, 0.15);
-  border-color: rgba(255, 95, 109, 0.4);
-  color: #ff5f6d;
-}
-
-.logout-btn.hidden {
-  display: none !important;
-}
