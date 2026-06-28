@@ -9,13 +9,13 @@ export const portfolioItems = [
     id: "portacoposAzul001",
     title: "Porta-copos Azul",
     description: "Em breve =)",
-    image: "images/portfolio/portacopos/azul/portacoposAzul001.jpeg",
+    image: "images/portfolio/portaCopos/azul/portacoposAzul001.jpeg",
   },
   {
     id: "portacoposVermelho001",
     title: "Porta-copos Vermelho",
     description: "Em breve =)",
-    image: "images/portfolio/portacopos/vermelho/portacoposVermelho001.jpeg",
+    image: "images/portfolio/portaCopos/vermelho/portacoposVermelho001.jpeg",
   },
   {
     id: "florPendurada001",
