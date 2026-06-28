@@ -126,7 +126,7 @@ async function openModal(item) {
 
   // Check login token
   const token = sessionStorage.getItem("fabul_auth_token");
-  const isLoggedIn = !!token;
+  const isLoggedIn = token && token !== "undefined" && token !== "null";
 
   if (modalAdminPanel) {
     modalAdminPanel.classList.toggle("hidden", !isLoggedIn);
@@ -134,44 +134,52 @@ async function openModal(item) {
 
   modalOverlay.classList.remove("hidden");
 
-  // Load existing Markdown content
-  try {
+  // Load existing Markdown content only if user is logged in
+  if (isLoggedIn) {
     if (modalMarkdownContent) {
+      modalMarkdownContent.style.display = "block";
       modalMarkdownContent.innerHTML = "<p class='admin-feedback loading'>Carregando descrição detalhada...</p>";
     }
     
-    const response = await fetch(`${GET_MARKDOWN_ENDPOINT}?id=${item.id}`, {
-      method: "GET"
-    });
+    try {
+      const response = await fetch(`${GET_MARKDOWN_ENDPOINT}?id=${item.id}`, {
+        method: "GET"
+      });
 
-    if (!response.ok) {
-      throw new Error(`Status HTTP ${response.status}`);
-    }
+      if (!response.ok) {
+        throw new Error(`Status HTTP ${response.status}`);
+      }
 
-    const rawData = await response.json().catch(() => null);
-    const data = Array.isArray(rawData) ? rawData[0] : rawData;
-    const content = (data && data.content) ? data.content.trim() : "";
+      const rawData = await response.json().catch(() => null);
+      const data = Array.isArray(rawData) ? rawData[0] : rawData;
+      const content = (data && data.content) ? data.content.trim() : "";
 
-    if (modalMarkdownContent) {
-      if (content) {
-        // Use marked library to parse markdown to HTML safely
-        if (typeof marked !== "undefined") {
-          modalMarkdownContent.innerHTML = marked.parse(content);
+      if (modalMarkdownContent) {
+        if (content) {
+          // Use marked library to parse markdown to HTML safely
+          if (typeof marked !== "undefined") {
+            modalMarkdownContent.innerHTML = marked.parse(content);
+          } else {
+            modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${content}</p>`;
+          }
+
+          if (markdownEditor) {
+            markdownEditor.value = content;
+          }
         } else {
-          modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${content}</p>`;
+          modalMarkdownContent.innerHTML = "";
         }
-
-        if (markdownEditor && isLoggedIn) {
-          markdownEditor.value = content;
-        }
-      } else {
-        modalMarkdownContent.innerHTML = "";
+      }
+    } catch (error) {
+      console.error("Failed to load markdown content", error);
+      if (modalMarkdownContent) {
+        modalMarkdownContent.innerHTML = "<p class='admin-feedback error'>Não foi possível carregar a descrição detalhada.</p>";
       }
     }
-  } catch (error) {
-    console.error("Failed to load markdown content", error);
+  } else {
     if (modalMarkdownContent) {
-      modalMarkdownContent.innerHTML = "<p class='admin-feedback error'>Não foi possível carregar a descrição detalhada.</p>";
+      modalMarkdownContent.style.display = "none";
+      modalMarkdownContent.innerHTML = "";
     }
   }
 }
@@ -202,7 +210,7 @@ function updateAuthStatusText(isConnected) {
 
 async function checkAuthStatus() {
   const token = sessionStorage.getItem("fabul_auth_token");
-  if (!token) {
+  if (!token || token === "undefined" || token === "null") {
     updateAuthStatusText(false);
     return;
   }

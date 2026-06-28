@@ -42,7 +42,7 @@ function updateAuthStatusText(isConnected) {
 
 async function checkAuthStatus() {
   const token = sessionStorage.getItem("fabul_auth_token");
-  if (!token) {
+  if (!token || token === "undefined" || token === "null") {
     updateAuthStatusText(false);
     return;
   }
