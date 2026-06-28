@@ -4,37 +4,21 @@ const submitBtn = loginForm.querySelector("button[type=submit]");
 const WEBHOOK = window.FABUL_WEBHOOK;
 const AUTH_ENDPOINT = window.FABUL_AUTH_ENDPOINT || null;
 const VALIDATE_ENDPOINT = window.FABUL_VALIDATE_ENDPOINT || null;
-
 let _sessionValidationInterval = null;
 
-// Modal elements
-const resultModal = document.getElementById("resultModal");
-const resultTitle = document.getElementById("resultTitle");
-const resultMessage = document.getElementById("resultMessage");
-const resultClose = document.getElementById("resultClose");
-const resultContinue = document.getElementById("resultContinue");
+const loginMessage = document.getElementById("loginMessage");
 
-function showResultModal(success, message) {
-  if (!resultModal) return;
-  resultTitle.textContent = success ? "Sucesso" : "Erro";
-  resultMessage.textContent = message || (success ? "Operação concluída." : "Ocorreu um erro.");
-  resultContinue.style.display = success ? "inline-block" : "none";
-  resultClose.style.display = success ? "none" : "inline-block";
-  resultModal.classList.remove("hidden");
-  resultModal.setAttribute("aria-hidden", "false");
+function showInlineMessage(success, message) {
+  if (!loginMessage) return;
+  loginMessage.textContent = message;
+  loginMessage.className = `login-message ${success ? "success" : "error"}`;
 }
 
-function hideResultModal() {
-  if (!resultModal) return;
-  resultModal.classList.add("hidden");
-  resultModal.setAttribute("aria-hidden", "true");
+function clearInlineMessage() {
+  if (!loginMessage) return;
+  loginMessage.textContent = "";
+  loginMessage.className = "login-message";
 }
-
-resultClose?.addEventListener("click", () => hideResultModal());
-resultContinue?.addEventListener("click", () => {
-  const HOME = window.FABUL_HOME || "/";
-  window.location.assign(HOME);
-});
 
 async function validateSession(token) {
   if (!VALIDATE_ENDPOINT || !token) return false;
@@ -82,6 +66,7 @@ function startSessionValidationPoll(token, intervalMs = 5 * 60 * 1000) {
 if (!WEBHOOK && !AUTH_ENDPOINT) console.warn("Nenhum endpoint configurado; abra login.html para definir window.FABUL_WEBHOOK ou window.FABUL_AUTH_ENDPOINT");
 
 loginForm.addEventListener("submit", async (e) => {
+  clearInlineMessage();
   e.preventDefault();
   feedback.textContent = "";
   const formData = new FormData(loginForm);
@@ -133,6 +118,11 @@ loginForm.addEventListener("submit", async (e) => {
       tokenValue = data.token || null;
       expires = data.expiresAt || null;
       if (data.user) sessionStorage.setItem("fabul_auth_user", JSON.stringify(data.user));
+    } else if (data && data.token) {
+      success = true;
+      tokenValue = data.token;
+      expires = data.expiresAt || null;
+      if (data.user) sessionStorage.setItem("fabul_auth_user", JSON.stringify({ username: data.user }));
     }
 
     if (success) {
@@ -143,16 +133,16 @@ loginForm.addEventListener("submit", async (e) => {
       if (token && VALIDATE_ENDPOINT) startSessionValidationPoll(token);
 
       feedback.textContent = "";
-      const HOME = window.FABUL_HOME || "/";
-      window.location.replace(HOME);
+      showInlineMessage(true, "Login realizado com sucesso");
+      window.location.href = "/";
     } else {
       feedback.textContent = "";
-      showResultModal(false, "Não foi possível realizar o login");
+      showInlineMessage(false, "Não foi possível realizar o login");
     }
   } catch (err) {
     console.error(err);
     feedback.textContent = "";
-    showResultModal(false, "Não foi possível realizar o login");
+    showInlineMessage(false, "Não foi possível realizar o login");
   } finally {
     submitBtn.disabled = false;
   }
