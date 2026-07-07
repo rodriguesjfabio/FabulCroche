@@ -206,6 +206,11 @@ loginForm.addEventListener("submit", async (e) => {
 
       feedback.textContent = "";
       showInlineMessage(true, "Login realizado com sucesso");
+      
+      // Redirect to index.html after 1 second
+      setTimeout(() => {
+        window.location.href = "./index.html";
+      }, 1000);
     } else {
       feedback.textContent = "";
       showInlineMessage(false, "Não foi possível realizar o login");
