@@ -2,6 +2,7 @@ import { portfolioItems } from "../data/portfolio.js";
 
 const portfolioGrid = document.querySelector("#portfolioGrid");
 const modalOverlay = document.querySelector("#modalOverlay");
+const modalCard = document.querySelector(".modal-card");
 const modalClose = document.querySelector("#modalClose");
 const modalImage = document.querySelector("#modalImage");
 const modalTitle = document.querySelector("#modalTitle");
@@ -25,6 +26,7 @@ const modalGallery = document.querySelector("#modalGallery");
 const adminViewControls = document.querySelector("#adminViewControls");
 const editMarkdownBtn = document.querySelector("#editMarkdownBtn");
 const cancelMarkdownBtn = document.querySelector("#cancelMarkdownBtn");
+const adminOnlySection = document.querySelector("#adminOnlySection");
 
 const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
@@ -157,8 +159,15 @@ async function openModal(item) {
   if (modalAdminPanel) {
     modalAdminPanel.classList.add("hidden");
   }
-  if (adminViewControls) {
-    adminViewControls.classList.toggle("hidden", !isLoggedIn);
+  if (adminOnlySection) {
+    adminOnlySection.classList.toggle("hidden", !isLoggedIn);
+  }
+
+  if (modalOverlay) {
+    modalOverlay.classList.toggle("admin-mode", isLoggedIn);
+  }
+  if (modalCard) {
+    modalCard.classList.toggle("admin-mode", isLoggedIn);
   }
 
   modalOverlay.classList.remove("hidden");
@@ -472,8 +481,7 @@ function initMarkdownEditorListeners() {
         adminFeedback.textContent = "";
         adminFeedback.className = "admin-feedback";
       }
-      if (modalMarkdownContent) modalMarkdownContent.style.display = "none";
-      if (adminViewControls) adminViewControls.classList.add("hidden");
+      if (adminOnlySection) adminOnlySection.classList.add("hidden");
       if (modalAdminPanel) modalAdminPanel.classList.remove("hidden");
       if (markdownEditor) {
         markdownEditor.focus();
@@ -502,7 +510,7 @@ function initMarkdownEditorListeners() {
         }
       }
       if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
-      if (adminViewControls) adminViewControls.classList.remove("hidden");
+      if (adminOnlySection) adminOnlySection.classList.remove("hidden");
     });
   }
 
@@ -560,7 +568,7 @@ function initMarkdownEditorListeners() {
         // Return to visual mode after showing success feedback
         setTimeout(() => {
           if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
-          if (adminViewControls) adminViewControls.classList.remove("hidden");
+          if (adminOnlySection) adminOnlySection.classList.remove("hidden");
           if (modalMarkdownContent) modalMarkdownContent.style.display = "block";
         }, 1000);
 
@@ -622,7 +630,7 @@ function initMarkdownEditorListeners() {
         // Return to visual mode after showing success feedback
         setTimeout(() => {
           if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
-          if (adminViewControls) adminViewControls.classList.remove("hidden");
+          if (adminOnlySection) adminOnlySection.classList.remove("hidden");
           if (modalMarkdownContent) modalMarkdownContent.style.display = "block";
         }, 1000);
 
