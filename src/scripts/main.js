@@ -22,6 +22,9 @@ const saveMarkdownBtn = document.querySelector("#saveMarkdownBtn");
 const clearMarkdownBtn = document.querySelector("#clearMarkdownBtn");
 const adminFeedback = document.querySelector("#adminFeedback");
 const modalGallery = document.querySelector("#modalGallery");
+const adminViewControls = document.querySelector("#adminViewControls");
+const editMarkdownBtn = document.querySelector("#editMarkdownBtn");
+const cancelMarkdownBtn = document.querySelector("#cancelMarkdownBtn");
 
 const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
@@ -36,6 +39,7 @@ const ITEMS_PER_PAGE = 6;
 let currentPage = 1;
 let authCheckInFlight = false;
 let currentItemInModal = null;
+let originalMarkdownContent = "";
 
 function renderPortfolioPage(page) {
   portfolioGrid.innerHTML = "";
@@ -140,6 +144,7 @@ async function openModal(item) {
   // Clear modal markdown view and editor
   if (modalMarkdownContent) modalMarkdownContent.innerHTML = "";
   if (markdownEditor) markdownEditor.value = "";
+  originalMarkdownContent = "";
   if (adminFeedback) {
     adminFeedback.textContent = "";
     adminFeedback.className = "admin-feedback";
@@ -150,7 +155,10 @@ async function openModal(item) {
   const isLoggedIn = token && token !== "undefined" && token !== "null";
 
   if (modalAdminPanel) {
-    modalAdminPanel.classList.toggle("hidden", !isLoggedIn);
+    modalAdminPanel.classList.add("hidden");
+  }
+  if (adminViewControls) {
+    adminViewControls.classList.toggle("hidden", !isLoggedIn);
   }
 
   modalOverlay.classList.remove("hidden");
@@ -174,6 +182,8 @@ async function openModal(item) {
       const rawData = await response.json().catch(() => null);
       const data = Array.isArray(rawData) ? rawData[0] : rawData;
       const content = (data && data.content) ? data.content.trim() : "";
+      
+      originalMarkdownContent = content;
 
       if (modalMarkdownContent) {
         if (content) {
@@ -455,6 +465,47 @@ function insertFormatting(textarea, formatType) {
 }
 
 function initMarkdownEditorListeners() {
+  // Bind Edit Description button
+  if (editMarkdownBtn) {
+    editMarkdownBtn.addEventListener("click", () => {
+      if (adminFeedback) {
+        adminFeedback.textContent = "";
+        adminFeedback.className = "admin-feedback";
+      }
+      if (modalMarkdownContent) modalMarkdownContent.style.display = "none";
+      if (adminViewControls) adminViewControls.classList.add("hidden");
+      if (modalAdminPanel) modalAdminPanel.classList.remove("hidden");
+      if (markdownEditor) {
+        markdownEditor.focus();
+      }
+    });
+  }
+
+  // Bind Cancel button
+  if (cancelMarkdownBtn) {
+    cancelMarkdownBtn.addEventListener("click", () => {
+      // Revert content in textarea to original state
+      if (markdownEditor) {
+        markdownEditor.value = originalMarkdownContent;
+      }
+      // Re-render original content in visual preview
+      if (modalMarkdownContent) {
+        modalMarkdownContent.style.display = "block";
+        if (originalMarkdownContent) {
+          if (typeof marked !== "undefined") {
+            modalMarkdownContent.innerHTML = marked.parse(originalMarkdownContent);
+          } else {
+            modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${originalMarkdownContent}</p>`;
+          }
+        } else {
+          modalMarkdownContent.innerHTML = "";
+        }
+      }
+      if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
+      if (adminViewControls) adminViewControls.classList.remove("hidden");
+    });
+  }
+
   if (saveMarkdownBtn) {
     saveMarkdownBtn.addEventListener("click", async () => {
       if (!currentItemInModal) return;
@@ -486,6 +537,8 @@ function initMarkdownEditorListeners() {
           throw new Error(`HTTP ${response.status}`);
         }
 
+        originalMarkdownContent = content;
+
         // Render updated markdown content
         if (modalMarkdownContent) {
           if (content) {
@@ -503,6 +556,14 @@ function initMarkdownEditorListeners() {
           adminFeedback.textContent = "Salvo com sucesso!";
           adminFeedback.className = "admin-feedback success";
         }
+
+        // Return to visual mode after showing success feedback
+        setTimeout(() => {
+          if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
+          if (adminViewControls) adminViewControls.classList.remove("hidden");
+          if (modalMarkdownContent) modalMarkdownContent.style.display = "block";
+        }, 1000);
+
       } catch (err) {
         console.error("Failed to load markdown content", err);
         if (adminFeedback) {
@@ -549,6 +610,7 @@ function initMarkdownEditorListeners() {
           throw new Error(`HTTP ${response.status}`);
         }
 
+        originalMarkdownContent = "";
         if (markdownEditor) markdownEditor.value = "";
         if (modalMarkdownContent) modalMarkdownContent.innerHTML = "";
 
@@ -556,6 +618,14 @@ function initMarkdownEditorListeners() {
           adminFeedback.textContent = "Conteúdo apagado com sucesso!";
           adminFeedback.className = "admin-feedback success";
         }
+
+        // Return to visual mode after showing success feedback
+        setTimeout(() => {
+          if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
+          if (adminViewControls) adminViewControls.classList.remove("hidden");
+          if (modalMarkdownContent) modalMarkdownContent.style.display = "block";
+        }, 1000);
+
       } catch (err) {
         console.error("Failed to clear markdown content", err);
         if (adminFeedback) {

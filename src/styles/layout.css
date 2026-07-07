@@ -637,7 +637,8 @@
   display: none !important;
 }
 
-.modal-admin-panel {
+.modal-admin-panel,
+.admin-view-controls {
   margin-top: 1.5rem;
   display: flex;
   flex-direction: column;

@@ -156,9 +156,15 @@
             <h3 id="modalTitle"></h3>
             <p id="modalDescription"></p>
             <div id="modalMarkdownContent" class="markdown-body"></div>
+            
+            <div id="adminViewControls" class="admin-view-controls hidden">
+              <hr class="admin-divider" />
+              <button id="editMarkdownBtn" class="btn btn-secondary btn-sm">Editar Descrição</button>
+            </div>
+
             <div id="modalAdminPanel" class="modal-admin-panel hidden">
               <hr class="admin-divider" />
-              <h4>Descrição Detalhada (Admin)</h4>
+              <h4>Editar Descrição Detalhada</h4>
               <div class="editor-container">
                 <div class="editor-toolbar" id="editorToolbar">
                   <button type="button" class="toolbar-btn" data-format="bold" title="Negrito">
@@ -184,6 +190,7 @@
               </div>
               <div class="admin-actions">
                 <button id="saveMarkdownBtn" class="btn btn-primary btn-sm">Salvar</button>
+                <button id="cancelMarkdownBtn" class="btn btn-secondary btn-sm">Cancelar</button>
                 <button id="clearMarkdownBtn" class="btn btn-danger btn-sm">Apagar Tudo</button>
               </div>
               <p id="adminFeedback" class="admin-feedback"></p>
