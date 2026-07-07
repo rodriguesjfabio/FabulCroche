@@ -400,6 +400,60 @@ function initLogoutListener() {
   });
 }
 
+function insertFormatting(textarea, formatType) {
+  if (!textarea) return;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const selectedText = text.substring(start, end);
+  let replacement = "";
+  let selectionOffsetStart = 0;
+  let selectionOffsetEnd = 0;
+
+  switch (formatType) {
+    case "bold":
+      replacement = `**${selectedText || "negrito"}**`;
+      selectionOffsetStart = selectedText ? 0 : 2;
+      selectionOffsetEnd = selectedText ? 0 : -2;
+      break;
+    case "italic":
+      replacement = `*${selectedText || "itálico"}*`;
+      selectionOffsetStart = selectedText ? 0 : 1;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "h1":
+      const prefixH1 = (start === 0 || text.charAt(start - 1) === "\n") ? "" : "\n";
+      replacement = `${prefixH1}# ${selectedText || "Título 1"}\n`;
+      selectionOffsetStart = selectedText ? 0 : prefixH1.length + 2;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "h2":
+      const prefixH2 = (start === 0 || text.charAt(start - 1) === "\n") ? "" : "\n";
+      replacement = `${prefixH2}## ${selectedText || "Título 2"}\n`;
+      selectionOffsetStart = selectedText ? 0 : prefixH2.length + 3;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "list":
+      const prefixList = (start === 0 || text.charAt(start - 1) === "\n") ? "" : "\n";
+      replacement = `${prefixList}- ${selectedText || "Item"}\n`;
+      selectionOffsetStart = selectedText ? 0 : prefixList.length + 2;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "link":
+      replacement = `[${selectedText || "Link"}](https://)`;
+      selectionOffsetStart = selectedText ? 0 : 1;
+      selectionOffsetEnd = selectedText ? 0 : -11;
+      break;
+  }
+
+  textarea.value = text.substring(0, start) + replacement + text.substring(end);
+  textarea.focus();
+  
+  const newStart = start + selectionOffsetStart;
+  const newEnd = start + replacement.length + selectionOffsetEnd;
+  textarea.setSelectionRange(newStart, newEnd);
+}
+
 function initMarkdownEditorListeners() {
   if (saveMarkdownBtn) {
     saveMarkdownBtn.addEventListener("click", async () => {
@@ -450,7 +504,7 @@ function initMarkdownEditorListeners() {
           adminFeedback.className = "admin-feedback success";
         }
       } catch (err) {
-        console.error("Failed to save markdown content", err);
+        console.error("Failed to load markdown content", err);
         if (adminFeedback) {
           adminFeedback.textContent = "Erro ao salvar o conteúdo.";
           adminFeedback.className = "admin-feedback error";
@@ -511,6 +565,20 @@ function initMarkdownEditorListeners() {
       } finally {
         clearMarkdownBtn.disabled = false;
         clearMarkdownBtn.textContent = "Apagar Tudo";
+      }
+    });
+  }
+
+  // Bind formatting toolbar buttons
+  const toolbar = document.querySelector("#editorToolbar");
+  if (toolbar && markdownEditor) {
+    toolbar.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toolbar-btn");
+      if (!btn) return;
+      
+      const format = btn.getAttribute("data-format");
+      if (format) {
+        insertFormatting(markdownEditor, format);
       }
     });
   }
