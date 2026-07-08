@@ -425,6 +425,7 @@
   min-height: 380px;
   object-fit: cover;
   border-radius: 24px;
+  cursor: pointer;
 }
 
 .modal-details h3 {
@@ -949,6 +950,74 @@
   .modal-details::-webkit-scrollbar-thumb:hover {
     background-color: rgba(163, 87, 108, 0.45);
   }
+}
+
+/* Lightbox Overlay Styles */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 11, 29, 0.92);
+  backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox-overlay:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightbox-content {
+  position: relative;
+  transform: scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.lightbox-overlay:not(.hidden) .lightbox-content {
+  transform: scale(1);
+}
+
+.lightbox-content img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 16px;
+  border: 1px solid rgba(249, 142, 169, 0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.75rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 101;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 95, 109, 0.2);
+  border-color: rgba(255, 95, 109, 0.4);
+  color: #ff5f6d;
+  transform: scale(1.05);
 }
 
 

@@ -27,6 +27,9 @@ const adminViewControls = document.querySelector("#adminViewControls");
 const editMarkdownBtn = document.querySelector("#editMarkdownBtn");
 const cancelMarkdownBtn = document.querySelector("#cancelMarkdownBtn");
 const adminOnlySection = document.querySelector("#adminOnlySection");
+const lightboxOverlay = document.querySelector("#lightboxOverlay");
+const lightboxImage = document.querySelector("#lightboxImage");
+const lightboxClose = document.querySelector("#lightboxClose");
 
 const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
@@ -321,10 +324,56 @@ function autosizeMessage() {
   messageInput.style.height = `${messageInput.scrollHeight}px`;
 }
 
+function closeLightbox() {
+  if (lightboxOverlay) {
+    lightboxOverlay.classList.add("hidden");
+    lightboxOverlay.setAttribute("aria-hidden", "true");
+  }
+  if (lightboxImage) {
+    lightboxImage.src = "";
+  }
+}
+
 function initModalListeners() {
-  modalClose.addEventListener("click", closeModal);
-  modalOverlay.addEventListener("click", (event) => {
-    if (event.target === modalOverlay) closeModal();
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalOverlay) {
+    modalOverlay.addEventListener("click", (event) => {
+      if (event.target === modalOverlay) closeModal();
+    });
+  }
+
+  // Click on modal main image to open lightbox
+  if (modalImage) {
+    modalImage.addEventListener("click", () => {
+      if (lightboxImage && lightboxOverlay) {
+        lightboxImage.src = modalImage.src;
+        lightboxOverlay.classList.remove("hidden");
+        lightboxOverlay.setAttribute("aria-hidden", "false");
+      }
+    });
+  }
+
+  // Close lightbox on button click or clicking background
+  if (lightboxClose) {
+    lightboxClose.addEventListener("click", closeLightbox);
+  }
+  if (lightboxOverlay) {
+    lightboxOverlay.addEventListener("click", (e) => {
+      if (e.target === lightboxOverlay) {
+        closeLightbox();
+      }
+    });
+  }
+
+  // Close with Escape key
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" || e.key === "Esc") {
+      if (lightboxOverlay && !lightboxOverlay.classList.contains("hidden")) {
+        closeLightbox();
+      } else {
+        closeModal();
+      }
+    }
   });
 }
 
