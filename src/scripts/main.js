@@ -40,7 +40,7 @@ const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.co
 const GET_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/CGHSEVHHlnQOMSRDCTzIQjVeMYPijsiu";
 const POST_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/nUTEPpUaIXoqyPBrVmUBazUJZHzOuhgo";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 3;
 let currentPage = 1;
 let authCheckInFlight = false;
 let currentItemInModal = null;
