@@ -15,6 +15,7 @@ Site estático de apresentação de trabalhos de crochet.
 - `src/data/portfolio.js` — dados do portfólio
 - `images/logos/` — logotipos da marca
 - `images/portfolio/` — imagens das peças do portfólio
+- 
 
 ## Observações
 
