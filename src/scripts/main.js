@@ -41,10 +41,13 @@ const GET_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/CGHSEVHHlnQOM
 const POST_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/nUTEPpUaIXoqyPBrVmUBazUJZHzOuhgo";
 
 const ITEMS_PER_PAGE = 3;
+const AUTH_CHECK_COOLDOWN_MS = 5 * 60 * 1000;
 let currentPage = 1;
 let authCheckInFlight = false;
 let currentItemInModal = null;
 let originalMarkdownContent = "";
+let lastAuthCheckAt = 0;
+let authCheckTimer = null;
 
 function renderPortfolioPage(page) {
   portfolioGrid.innerHTML = "";
@@ -251,16 +254,22 @@ function updateAuthStatusText(isConnected) {
   }
 }
 
-async function checkAuthStatus() {
+async function checkAuthStatus(force = false) {
   const token = sessionStorage.getItem("fabul_auth_token");
   if (!token || token === "undefined" || token === "null") {
     updateAuthStatusText(false);
     return;
   }
 
+  const now = Date.now();
+  if (!force && (now - lastAuthCheckAt) < AUTH_CHECK_COOLDOWN_MS) {
+    return;
+  }
+
   if (authCheckInFlight) return;
 
   authCheckInFlight = true;
+  lastAuthCheckAt = now;
   updateAuthStatusText(true);
 
   try {
@@ -303,7 +312,7 @@ function initNavigation() {
   document.querySelectorAll(".site-nav a").forEach((link) => {
     link.addEventListener("click", () => {
       siteNav.classList.remove("open");
-      checkAuthStatus();
+      checkAuthStatus(true);
     });
   });
 }
@@ -711,6 +720,13 @@ function initMarkdownEditorListeners() {
   }
 }
 
+function scheduleAuthCheck() {
+  if (authCheckTimer) clearTimeout(authCheckTimer);
+  authCheckTimer = setTimeout(() => {
+    checkAuthStatus(true);
+  }, AUTH_CHECK_COOLDOWN_MS);
+}
+
 function init() {
   renderPortfolioPage(currentPage);
   renderPagination();
@@ -722,16 +738,17 @@ function init() {
   initLogoutListener();
   initMarkdownEditorListeners();
 
-  window.addEventListener("hashchange", () => checkAuthStatus());
-  window.addEventListener("pageshow", () => checkAuthStatus());
-  window.addEventListener("focus", () => checkAuthStatus());
+  window.addEventListener("hashchange", () => checkAuthStatus(true));
+  window.addEventListener("pageshow", () => checkAuthStatus(true));
+  window.addEventListener("focus", () => checkAuthStatus(true));
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      checkAuthStatus();
+      checkAuthStatus(true);
     }
   });
 
-  checkAuthStatus();
+  checkAuthStatus(true);
+  scheduleAuthCheck();
 }
 
 init();
