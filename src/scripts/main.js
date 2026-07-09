@@ -2,6 +2,7 @@ import { portfolioItems } from "../data/portfolio.js";
 
 const portfolioGrid = document.querySelector("#portfolioGrid");
 const modalOverlay = document.querySelector("#modalOverlay");
+const modalCard = document.querySelector(".modal-card");
 const modalClose = document.querySelector("#modalClose");
 const modalImage = document.querySelector("#modalImage");
 const modalTitle = document.querySelector("#modalTitle");
@@ -22,6 +23,13 @@ const saveMarkdownBtn = document.querySelector("#saveMarkdownBtn");
 const clearMarkdownBtn = document.querySelector("#clearMarkdownBtn");
 const adminFeedback = document.querySelector("#adminFeedback");
 const modalGallery = document.querySelector("#modalGallery");
+const adminViewControls = document.querySelector("#adminViewControls");
+const editMarkdownBtn = document.querySelector("#editMarkdownBtn");
+const cancelMarkdownBtn = document.querySelector("#cancelMarkdownBtn");
+const adminOnlySection = document.querySelector("#adminOnlySection");
+const lightboxOverlay = document.querySelector("#lightboxOverlay");
+const lightboxImage = document.querySelector("#lightboxImage");
+const lightboxClose = document.querySelector("#lightboxClose");
 
 const AUTH_CHECK_ENDPOINT = window.FABUL_AUTH_CHECK_ENDPOINT || "https://n8n.fabulcroche.com/webhook/HuQzWFcAeLgEYKMlishMIdArkRaXdebg";
 const contactEndpoint = "https://n8n.fabulcroche.com/webhook/NDjNtJQSzQjDKtdoubnINaFDYJIPKVro";
@@ -32,10 +40,14 @@ const allowedEmailDomains = ["gmail.com", "outlook.com", "hotmail.com", "live.co
 const GET_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/CGHSEVHHlnQOMSRDCTzIQjVeMYPijsiu";
 const POST_MARKDOWN_ENDPOINT = "https://n8n.fabulcroche.com/webhook/nUTEPpUaIXoqyPBrVmUBazUJZHzOuhgo";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 3;
+const AUTH_CHECK_COOLDOWN_MS = 5 * 60 * 1000;
 let currentPage = 1;
 let authCheckInFlight = false;
 let currentItemInModal = null;
+let originalMarkdownContent = "";
+let lastAuthCheckAt = 0;
+let authCheckTimer = null;
 
 function renderPortfolioPage(page) {
   portfolioGrid.innerHTML = "";
@@ -140,6 +152,7 @@ async function openModal(item) {
   // Clear modal markdown view and editor
   if (modalMarkdownContent) modalMarkdownContent.innerHTML = "";
   if (markdownEditor) markdownEditor.value = "";
+  originalMarkdownContent = "";
   if (adminFeedback) {
     adminFeedback.textContent = "";
     adminFeedback.className = "admin-feedback";
@@ -150,7 +163,17 @@ async function openModal(item) {
   const isLoggedIn = token && token !== "undefined" && token !== "null";
 
   if (modalAdminPanel) {
-    modalAdminPanel.classList.toggle("hidden", !isLoggedIn);
+    modalAdminPanel.classList.add("hidden");
+  }
+  if (adminOnlySection) {
+    adminOnlySection.classList.toggle("hidden", !isLoggedIn);
+  }
+
+  if (modalOverlay) {
+    modalOverlay.classList.toggle("admin-mode", isLoggedIn);
+  }
+  if (modalCard) {
+    modalCard.classList.toggle("admin-mode", isLoggedIn);
   }
 
   modalOverlay.classList.remove("hidden");
@@ -174,6 +197,8 @@ async function openModal(item) {
       const rawData = await response.json().catch(() => null);
       const data = Array.isArray(rawData) ? rawData[0] : rawData;
       const content = (data && data.content) ? data.content.trim() : "";
+      
+      originalMarkdownContent = content;
 
       if (modalMarkdownContent) {
         if (content) {
@@ -229,16 +254,22 @@ function updateAuthStatusText(isConnected) {
   }
 }
 
-async function checkAuthStatus() {
+async function checkAuthStatus(force = false) {
   const token = sessionStorage.getItem("fabul_auth_token");
   if (!token || token === "undefined" || token === "null") {
     updateAuthStatusText(false);
     return;
   }
 
+  const now = Date.now();
+  if (!force && (now - lastAuthCheckAt) < AUTH_CHECK_COOLDOWN_MS) {
+    return;
+  }
+
   if (authCheckInFlight) return;
 
   authCheckInFlight = true;
+  lastAuthCheckAt = now;
   updateAuthStatusText(true);
 
   try {
@@ -281,7 +312,7 @@ function initNavigation() {
   document.querySelectorAll(".site-nav a").forEach((link) => {
     link.addEventListener("click", () => {
       siteNav.classList.remove("open");
-      checkAuthStatus();
+      checkAuthStatus(true);
     });
   });
 }
@@ -302,10 +333,56 @@ function autosizeMessage() {
   messageInput.style.height = `${messageInput.scrollHeight}px`;
 }
 
+function closeLightbox() {
+  if (lightboxOverlay) {
+    lightboxOverlay.classList.add("hidden");
+    lightboxOverlay.setAttribute("aria-hidden", "true");
+  }
+  if (lightboxImage) {
+    lightboxImage.src = "";
+  }
+}
+
 function initModalListeners() {
-  modalClose.addEventListener("click", closeModal);
-  modalOverlay.addEventListener("click", (event) => {
-    if (event.target === modalOverlay) closeModal();
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalOverlay) {
+    modalOverlay.addEventListener("click", (event) => {
+      if (event.target === modalOverlay) closeModal();
+    });
+  }
+
+  // Click on modal main image to open lightbox
+  if (modalImage) {
+    modalImage.addEventListener("click", () => {
+      if (lightboxImage && lightboxOverlay) {
+        lightboxImage.src = modalImage.src;
+        lightboxOverlay.classList.remove("hidden");
+        lightboxOverlay.setAttribute("aria-hidden", "false");
+      }
+    });
+  }
+
+  // Close lightbox on button click or clicking background
+  if (lightboxClose) {
+    lightboxClose.addEventListener("click", closeLightbox);
+  }
+  if (lightboxOverlay) {
+    lightboxOverlay.addEventListener("click", (e) => {
+      if (e.target === lightboxOverlay) {
+        closeLightbox();
+      }
+    });
+  }
+
+  // Close with Escape key
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" || e.key === "Esc") {
+      if (lightboxOverlay && !lightboxOverlay.classList.contains("hidden")) {
+        closeLightbox();
+      } else {
+        closeModal();
+      }
+    }
   });
 }
 
@@ -400,7 +477,101 @@ function initLogoutListener() {
   });
 }
 
+function insertFormatting(textarea, formatType) {
+  if (!textarea) return;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const selectedText = text.substring(start, end);
+  let replacement = "";
+  let selectionOffsetStart = 0;
+  let selectionOffsetEnd = 0;
+
+  switch (formatType) {
+    case "bold":
+      replacement = `**${selectedText || "negrito"}**`;
+      selectionOffsetStart = selectedText ? 0 : 2;
+      selectionOffsetEnd = selectedText ? 0 : -2;
+      break;
+    case "italic":
+      replacement = `*${selectedText || "itálico"}*`;
+      selectionOffsetStart = selectedText ? 0 : 1;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "h1":
+      const prefixH1 = (start === 0 || text.charAt(start - 1) === "\n") ? "" : "\n";
+      replacement = `${prefixH1}# ${selectedText || "Título 1"}\n`;
+      selectionOffsetStart = selectedText ? 0 : prefixH1.length + 2;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "h2":
+      const prefixH2 = (start === 0 || text.charAt(start - 1) === "\n") ? "" : "\n";
+      replacement = `${prefixH2}## ${selectedText || "Título 2"}\n`;
+      selectionOffsetStart = selectedText ? 0 : prefixH2.length + 3;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "list":
+      const prefixList = (start === 0 || text.charAt(start - 1) === "\n") ? "" : "\n";
+      replacement = `${prefixList}- ${selectedText || "Item"}\n`;
+      selectionOffsetStart = selectedText ? 0 : prefixList.length + 2;
+      selectionOffsetEnd = selectedText ? 0 : -1;
+      break;
+    case "link":
+      replacement = `[${selectedText || "Link"}](https://)`;
+      selectionOffsetStart = selectedText ? 0 : 1;
+      selectionOffsetEnd = selectedText ? 0 : -11;
+      break;
+  }
+
+  textarea.value = text.substring(0, start) + replacement + text.substring(end);
+  textarea.focus();
+  
+  const newStart = start + selectionOffsetStart;
+  const newEnd = start + replacement.length + selectionOffsetEnd;
+  textarea.setSelectionRange(newStart, newEnd);
+}
+
 function initMarkdownEditorListeners() {
+  // Bind Edit Description button
+  if (editMarkdownBtn) {
+    editMarkdownBtn.addEventListener("click", () => {
+      if (adminFeedback) {
+        adminFeedback.textContent = "";
+        adminFeedback.className = "admin-feedback";
+      }
+      if (adminOnlySection) adminOnlySection.classList.add("hidden");
+      if (modalAdminPanel) modalAdminPanel.classList.remove("hidden");
+      if (markdownEditor) {
+        markdownEditor.focus();
+      }
+    });
+  }
+
+  // Bind Cancel button
+  if (cancelMarkdownBtn) {
+    cancelMarkdownBtn.addEventListener("click", () => {
+      // Revert content in textarea to original state
+      if (markdownEditor) {
+        markdownEditor.value = originalMarkdownContent;
+      }
+      // Re-render original content in visual preview
+      if (modalMarkdownContent) {
+        modalMarkdownContent.style.display = "block";
+        if (originalMarkdownContent) {
+          if (typeof marked !== "undefined") {
+            modalMarkdownContent.innerHTML = marked.parse(originalMarkdownContent);
+          } else {
+            modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${originalMarkdownContent}</p>`;
+          }
+        } else {
+          modalMarkdownContent.innerHTML = "";
+        }
+      }
+      if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
+      if (adminOnlySection) adminOnlySection.classList.remove("hidden");
+    });
+  }
+
   if (saveMarkdownBtn) {
     saveMarkdownBtn.addEventListener("click", async () => {
       if (!currentItemInModal) return;
@@ -432,6 +603,8 @@ function initMarkdownEditorListeners() {
           throw new Error(`HTTP ${response.status}`);
         }
 
+        originalMarkdownContent = content;
+
         // Render updated markdown content
         if (modalMarkdownContent) {
           if (content) {
@@ -449,8 +622,16 @@ function initMarkdownEditorListeners() {
           adminFeedback.textContent = "Salvo com sucesso!";
           adminFeedback.className = "admin-feedback success";
         }
+
+        // Return to visual mode after showing success feedback
+        setTimeout(() => {
+          if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
+          if (adminOnlySection) adminOnlySection.classList.remove("hidden");
+          if (modalMarkdownContent) modalMarkdownContent.style.display = "block";
+        }, 1000);
+
       } catch (err) {
-        console.error("Failed to save markdown content", err);
+        console.error("Failed to load markdown content", err);
         if (adminFeedback) {
           adminFeedback.textContent = "Erro ao salvar o conteúdo.";
           adminFeedback.className = "admin-feedback error";
@@ -495,6 +676,7 @@ function initMarkdownEditorListeners() {
           throw new Error(`HTTP ${response.status}`);
         }
 
+        originalMarkdownContent = "";
         if (markdownEditor) markdownEditor.value = "";
         if (modalMarkdownContent) modalMarkdownContent.innerHTML = "";
 
@@ -502,6 +684,14 @@ function initMarkdownEditorListeners() {
           adminFeedback.textContent = "Conteúdo apagado com sucesso!";
           adminFeedback.className = "admin-feedback success";
         }
+
+        // Return to visual mode after showing success feedback
+        setTimeout(() => {
+          if (modalAdminPanel) modalAdminPanel.classList.add("hidden");
+          if (adminOnlySection) adminOnlySection.classList.remove("hidden");
+          if (modalMarkdownContent) modalMarkdownContent.style.display = "block";
+        }, 1000);
+
       } catch (err) {
         console.error("Failed to clear markdown content", err);
         if (adminFeedback) {
@@ -514,6 +704,27 @@ function initMarkdownEditorListeners() {
       }
     });
   }
+
+  // Bind formatting toolbar buttons
+  const toolbar = document.querySelector("#editorToolbar");
+  if (toolbar && markdownEditor) {
+    toolbar.addEventListener("click", (e) => {
+      const btn = e.target.closest(".toolbar-btn");
+      if (!btn) return;
+      
+      const format = btn.getAttribute("data-format");
+      if (format) {
+        insertFormatting(markdownEditor, format);
+      }
+    });
+  }
+}
+
+function scheduleAuthCheck() {
+  if (authCheckTimer) clearTimeout(authCheckTimer);
+  authCheckTimer = setTimeout(() => {
+    checkAuthStatus(true);
+  }, AUTH_CHECK_COOLDOWN_MS);
 }
 
 function init() {
@@ -527,16 +738,17 @@ function init() {
   initLogoutListener();
   initMarkdownEditorListeners();
 
-  window.addEventListener("hashchange", () => checkAuthStatus());
-  window.addEventListener("pageshow", () => checkAuthStatus());
-  window.addEventListener("focus", () => checkAuthStatus());
+  window.addEventListener("hashchange", () => checkAuthStatus(true));
+  window.addEventListener("pageshow", () => checkAuthStatus(true));
+  window.addEventListener("focus", () => checkAuthStatus(true));
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      checkAuthStatus();
+      checkAuthStatus(true);
     }
   });
 
-  checkAuthStatus();
+  checkAuthStatus(true);
+  scheduleAuthCheck();
 }
 
 init();
