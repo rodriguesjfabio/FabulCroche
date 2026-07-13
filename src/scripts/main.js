@@ -752,3 +752,23 @@ function init() {
 }
 
 init();
+
+document.getElementById("whatsapp-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    const text = "Olá! Conheci o trabalho de vocês pelo site e gostaria de saber mais sobre as peças de crochê.";
+
+    window.open(
+        `https://wa.me/5547920041823?text=${encodeURIComponent(text)}`,
+        "_blank"
+    );
+});
+
+document.getElementById("whatsapp-link2").addEventListener("click", (e) => {
+    e.preventDefault();
+    const text = "Olá! Conheci o trabalho de vocês pelo site e gostaria de saber mais sobre as peças de crochê.";
+
+    window.open(
+        `https://wa.me/5547920041823?text=${encodeURIComponent(text)}`,
+        "_blank"
+    );
+});
