@@ -49,11 +49,30 @@ let originalMarkdownContent = "";
 let lastAuthCheckAt = 0;
 let authCheckTimer = null;
 
-function renderPortfolioPage(page) {
+function isUserLoggedIn() {
+  const token = sessionStorage.getItem("fabul_auth_token");
+  return !!token && token !== "undefined" && token !== "null";
+}
+
+function getVisiblePortfolioItems() {
+  return portfolioItems.filter((item) => !item.isAdminOnly || isUserLoggedIn());
+}
+
+function refreshPortfolioView() {
+  renderPortfolioPage(currentPage);
+  renderPagination();
+}
+
+function renderPortfolioPage(page = currentPage) {
+  const visibleItems = getVisiblePortfolioItems();
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  currentPage = safePage;
+
   portfolioGrid.innerHTML = "";
-  const startIndex = (page - 1) * ITEMS_PER_PAGE;
+  const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const pageItems = portfolioItems.slice(startIndex, endIndex);
+  const pageItems = visibleItems.slice(startIndex, endIndex);
 
   pageItems.forEach((item) => {
     const card = document.createElement("article");
@@ -72,7 +91,8 @@ function renderPortfolioPage(page) {
 }
 
 function renderPagination() {
-  const totalPages = Math.ceil(portfolioItems.length / ITEMS_PER_PAGE);
+  const visibleItems = getVisiblePortfolioItems();
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / ITEMS_PER_PAGE));
 
   if (totalPages <= 1) {
     paginationElement.style.display = "none";
@@ -258,6 +278,7 @@ async function checkAuthStatus(force = false) {
   const token = sessionStorage.getItem("fabul_auth_token");
   if (!token || token === "undefined" || token === "null") {
     updateAuthStatusText(false);
+    refreshPortfolioView();
     return;
   }
 
@@ -296,6 +317,7 @@ async function checkAuthStatus(force = false) {
       sessionStorage.removeItem("fabul_auth_user");
     }
     updateAuthStatusText(isConnected);
+    refreshPortfolioView();
   } catch (error) {
     console.error("Auth status check failed", error);
     updateAuthStatusText(true);
@@ -473,6 +495,7 @@ function initLogoutListener() {
       logoutBtn.disabled = false;
       logoutBtn.textContent = "Sair";
       updateAuthStatusText(false);
+      refreshPortfolioView();
     }
   });
 }
@@ -728,8 +751,7 @@ function scheduleAuthCheck() {
 }
 
 function init() {
-  renderPortfolioPage(currentPage);
-  renderPagination();
+  refreshPortfolioView();
   initNavigation();
   initPortfolioListeners();
   initModalListeners();

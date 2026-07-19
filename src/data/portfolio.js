@@ -1,4 +1,11 @@
-export const portfolioItems = [
+export const portfolioItems = [  
+  {
+    id: "portaCerveja001",
+    title: "Porta Cerveja de Rato",
+    description: "Em breve?",
+    images: ["images/ImageNotAvailable.png"],
+    isAdminOnly: true,
+  },
   {
     id: "christmasTree001",
     title: "Arvore de Natal",
