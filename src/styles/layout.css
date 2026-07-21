@@ -421,6 +421,24 @@
   padding: 2rem;
 }
 
+.modal-description {
+  line-height: 1.7;
+  color: rgba(59, 38, 67, 0.9);
+  text-align: justify;
+}
+
+.modal-description p {
+  margin: 0 0 0.8rem;
+}
+
+.modal-description strong {
+  color: var(--accent-dark);
+}
+
+.modal-description em {
+  font-style: italic;
+}
+
 .modal-image img {
   width: 100%;
   height: 100%;

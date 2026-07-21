@@ -49,6 +49,18 @@ let originalMarkdownContent = "";
 let lastAuthCheckAt = 0;
 let authCheckTimer = null;
 
+function renderPlainText(content = "") {
+  if (!content) return "";
+
+  return String(content)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r?\n/g, "<br>");
+}
+
 function isUserLoggedIn() {
   const token = sessionStorage.getItem("fabul_auth_token");
   return !!token && token !== "undefined" && token !== "null";
@@ -148,7 +160,10 @@ async function openModal(item) {
   modalImage.src = mainImg;
   modalImage.alt = item.title;
   modalTitle.textContent = item.title;
-  modalDescription.textContent = item.description;
+
+  if (modalDescription) {
+    modalDescription.innerHTML = renderPlainText(item.description || "");
+  }
 
   // Render multiple images if available
   if (modalGallery) {
@@ -222,12 +237,7 @@ async function openModal(item) {
 
       if (modalMarkdownContent) {
         if (content) {
-          // Use marked library to parse markdown to HTML safely
-          if (typeof marked !== "undefined") {
-            modalMarkdownContent.innerHTML = marked.parse(content);
-          } else {
-            modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${content}</p>`;
-          }
+          modalMarkdownContent.innerHTML = renderPlainText(content);
 
           if (markdownEditor) {
             markdownEditor.value = content;
@@ -581,11 +591,7 @@ function initMarkdownEditorListeners() {
       if (modalMarkdownContent) {
         modalMarkdownContent.style.display = "block";
         if (originalMarkdownContent) {
-          if (typeof marked !== "undefined") {
-            modalMarkdownContent.innerHTML = marked.parse(originalMarkdownContent);
-          } else {
-            modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${originalMarkdownContent}</p>`;
-          }
+          modalMarkdownContent.innerHTML = renderPlainText(originalMarkdownContent);
         } else {
           modalMarkdownContent.innerHTML = "";
         }
@@ -631,11 +637,7 @@ function initMarkdownEditorListeners() {
         // Render updated markdown content
         if (modalMarkdownContent) {
           if (content) {
-            if (typeof marked !== "undefined") {
-              modalMarkdownContent.innerHTML = marked.parse(content);
-            } else {
-              modalMarkdownContent.innerHTML = `<p style="white-space: pre-wrap;">${content}</p>`;
-            }
+            modalMarkdownContent.innerHTML = renderPlainText(content);
           } else {
             modalMarkdownContent.innerHTML = "";
           }

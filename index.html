@@ -10,6 +10,7 @@
     />
     <link rel="stylesheet" href="./src/styles/main.css" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -156,7 +157,7 @@
           </div>
           <div class="modal-details">
             <h3 id="modalTitle"></h3>
-            <p id="modalDescription"></p>
+            <div id="modalDescription" class="modal-description"></div>
             
             <div id="adminOnlySection" class="admin-only-section hidden">
               <div class="admin-section-header">
